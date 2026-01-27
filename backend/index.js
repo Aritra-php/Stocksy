@@ -2,6 +2,8 @@ require('dotenv').config();
 
 const express = require("express"); 
 const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
 //requir models 
 const {HoldingsModel} = require("./model/HoldingsModel"); 
@@ -13,7 +15,38 @@ const uri = process.env.MONGO_URL;
 
 const app = express(); 
 
+app.use(cors());
+app.use(bodyParser.json());
 
+
+//fetching Holdings data
+app.get("/allHoldings", async (req, res) => {
+  let allHoldings = await HoldingsModel.find({});
+  res.json(allHoldings);
+});
+
+
+//fetching positions data
+app.get("/allPositions", async (req, res) => {
+  let allPositions = await PositionsModel.find({});
+  res.json(allPositions);
+});
+
+//function for new order
+app.post("/newOrder", async (req, res) => {
+  let newOrder = new OrdersModel({
+    name: req.body.name,
+    qty: req.body.qty,
+    price: req.body.price,
+    mode: req.body.mode,
+  });
+
+  newOrder.save();
+
+  res.send("Order saved!");
+});
+
+//port connection
 app.listen(PORT, ()=>{
     console.log("App started");
     mongoose.connect(uri); 
